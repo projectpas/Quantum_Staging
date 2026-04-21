@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[Employees] (
+    [SysUserId]       BIGINT          NOT NULL,
+    [UserName]        VARCHAR (100)   NULL,
+    [EmployeeCode]    VARCHAR (100)   NULL,
+    [EmailAddress]    VARCHAR (100)   NULL,
+    [PhoneNumber]     VARCHAR (50)    NULL,
+    [FaxNumber]       VARCHAR (50)    NULL,
+    [FirstName]       VARCHAR (50)    NULL,
+    [MiddleName]      VARCHAR (50)    NULL,
+    [LastName]        VARCHAR (50)    NULL,
+    [EmailSignature]  VARCHAR (500)   NULL,
+    [StartDate]       DATETIME2 (7)   NULL,
+    [EndDate]         DATETIME2 (7)   NULL,
+    [CustomerId]      BIGINT          NULL,
+    [BirthPlace]      VARCHAR (100)   NULL,
+    [BirthDate]       DATETIME2 (7)   NULL,
+    [Nationality]     VARCHAR (50)    NULL,
+    [HomeCountry]     VARCHAR (50)    NULL,
+    [BurdenRate]      DECIMAL (18, 2) NULL,
+    [FixedOverhead]   DECIMAL (18, 2) NULL,
+    [UrlLink]         VARCHAR (500)   NULL,
+    [MasterCompanyId] BIGINT          NULL,
+    [Migrated_Id]     BIGINT          NULL,
+    [SuccessMsg]      VARCHAR (500)   NULL,
+    [ErrorMsg]        VARCHAR (500)   NULL,
+    CONSTRAINT [PK_Employees] PRIMARY KEY CLUSTERED ([SysUserId] ASC)
+);
+

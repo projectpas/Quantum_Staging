@@ -1,0 +1,27 @@
+﻿CREATE TABLE [dbo].[StockReservations] (
+    [StockReservationId]  BIGINT          NOT NULL,
+    [SOPartId]            BIGINT          NULL,
+    [StocklineId]         BIGINT          NULL,
+    [ROPartId]            BIGINT          NULL,
+    [ConsignmentCodeId]   BIGINT          NULL,
+    [WorkOrderId]         BIGINT          NULL,
+    [WorkOrderMaterialId] BIGINT          NULL,
+    [WorkOrderTaskToolId] BIGINT          NULL,
+    [SMDetailId]          BIGINT          NULL,
+    [UnitCost]            DECIMAL (18, 2) NULL,
+    [QtyReserved]         INT             NULL,
+    [QtyShip]             INT             NULL,
+    [QtyInvoiced]         INT             NULL,
+    [QtyRepaired]         INT             NULL,
+    [QtyScrapped]         INT             NULL,
+    [POPartId]            BIGINT          NULL,
+    [QtyIssued]           INT             NULL,
+    [QtyUndoIssue]        INT             NULL,
+    [EntryDate]           DATETIME2 (7)   NULL,
+    [MasterCompanyId]     BIGINT          NULL,
+    [Migrated_Id]         BIGINT          NULL,
+    [SuccessMsg]          VARCHAR (500)   NULL,
+    [ErrorMsg]            VARCHAR (500)   NULL,
+    CONSTRAINT [PK_StockReservations] PRIMARY KEY CLUSTERED ([StockReservationId] ASC)
+);
+
