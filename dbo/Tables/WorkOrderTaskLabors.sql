@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[WorkOrderTaskLabors] (
+    [WorkOrderTaskLaborId] BIGINT          NOT NULL,
+    [WorkOrderTaskId]      BIGINT          NULL,
+    [SysUserId]            BIGINT          NULL,
+    [SysUserEntryId]       BIGINT          NULL,
+    [StartTime]            DATETIME2 (7)   NULL,
+    [StopTime]             DATETIME2 (7)   NULL,
+    [Hours]                DECIMAL (18, 2) NULL,
+    [Notes]                VARCHAR (MAX)   NULL,
+    [BillingRate]          DECIMAL (18, 2) NULL,
+    [BurdenRate]           DECIMAL (18, 2) NULL,
+    [WorkOrderSkillsId]    BIGINT          NULL,
+    [ItemMasterId]         BIGINT          NULL,
+    [HoursBilled]          DECIMAL (18, 2) NULL,
+    [HoursBillable]        DECIMAL (18, 2) NULL,
+    [SvrStartTime]         DATETIME2 (7)   NULL,
+    [SvrStopTime]          DATETIME2 (7)   NULL,
+    [DeleteDate]           DATETIME2 (7)   NULL,
+    [DateCreated]          DATETIME2 (7)   NULL,
+    [MasterCompanyId]      BIGINT          NULL,
+    [Migrated_Id]          BIGINT          NULL,
+    [SuccessMsg]           VARCHAR (500)   NULL,
+    [ErrorMsg]             VARCHAR (500)   NULL,
+    CONSTRAINT [PK_WorkOrderTaskLabors] PRIMARY KEY CLUSTERED ([WorkOrderTaskLaborId] ASC)
+);
+
