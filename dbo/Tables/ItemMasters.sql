@@ -6,7 +6,7 @@
     [ItemClassificationId] BIGINT          NULL,
     [ManufacturerId]       BIGINT          NULL,
     [UnitOfMeasureId]      BIGINT          NULL,
-    [PartNumber]           VARCHAR (100)   NULL,
+    [PartNumber]           VARCHAR (1000)  NULL,
     [PartDescription]      VARCHAR (MAX)   NULL,
     [Hazard_Material]      VARCHAR (10)    NULL,
     [DER_Flag]             VARCHAR (10)    NULL,

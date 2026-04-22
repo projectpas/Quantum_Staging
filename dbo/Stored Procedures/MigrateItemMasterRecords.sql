@@ -25,7 +25,7 @@ declare @p7 int
 set @p7=NULL
 declare @p8 int
 set @p8=NULL
-exec sp_executesql N'EXEC MigrateItemMasterRecords @FromMasterComanyID, @UserName, @Processed OUTPUT, @Migrated OUTPUT, @Failed OUTPUT, @Exists OUTPUT',N'@FromMasterComanyID int,@UserName nvarchar(12),@Processed int output,@Migrated int output,@Failed int output,@Exists int output',@FromMasterComanyID=12,@UserName=N'ROGER BENTLY',@Processed=@p5 output,@Migrated=@p6 output,@Failed=@p7 output,@Exists=@p8 output
+exec sp_executesql N'EXEC MigrateItemMasterRecords @FromMasterComanyID, @UserName, @Processed OUTPUT, @Migrated OUTPUT, @Failed OUTPUT, @Exists OUTPUT',N'@FromMasterComanyID int,@UserName nvarchar(12),@Processed int output,@Migrated int output,@Failed int output,@Exists int output',@FromMasterComanyID=25,@UserName=N'ROGER BENTLY',@Processed=@p5 output,@Migrated=@p6 output,@Failed=@p7 output,@Exists=@p8 output
 select @p5, @p6, @p7, @p8
 **************************************************************/
 CREATE   PROCEDURE [dbo].[MigrateItemMasterRecords]
@@ -61,7 +61,7 @@ BEGIN
 			[ItemClassificationId] [bigint] NULL,
 			[ManufacturerId] [bigint] NULL,
 			[UnitOfMeasureId] [bigint] NULL,
-			[PartNumber] [varchar](100) NULL,
+			[PartNumber] [varchar](8000) NULL,
 			[PartDescription] [varchar](max) NULL,
 			[Hazard_Material] [varchar](10) NULL,
 			[DER_Flag] [varchar](10) NULL,
@@ -109,11 +109,13 @@ BEGIN
 
 			DECLARE @PN VARCHAR(100) = NULL;
 			DECLARE @ManufacturerId BIGINT = 0;
+			DECLARE @PASManufacturerId BIGINT = NULL;
 			DECLARE @ItemGroupdId BIGINT = 0;
+			DECLARE @PASItemGroupdId BIGINT = NULL;
 			DECLARE @ItemClassificationId BIGINT = 0;
 			DECLARE @GLAccountId BIGINT = 0;
 			DECLARE @UOM_AUTO_KEY AS FLOAT = 0;
-			DECLARE @UOMId BIGINT = 0;
+			DECLARE @UOMId BIGINT = NULL;
 			DECLARE @PriorityId BIGINT = 0;
 			DECLARE @CurrencyId BIGINT = 0;
 			DECLARE @CurrentItemMasterId BIGINT = 0;
@@ -164,36 +166,76 @@ BEGIN
 
 			IF (@FoundError = 0)
 			BEGIN
-				IF NOT EXISTS (SELECT 1 FROM [PAS_BETA].DBO.GLAccount GL WITH (NOLOCK) WHERE AccountCode = '10000' AND MasterCompanyId = @FromMasterComanyID)
+				IF NOT EXISTS (SELECT 1 FROM [PowerAeroSuites_BAG].DBO.GLAccount GL WITH (NOLOCK) WHERE AccountCode = '10000' AND MasterCompanyId = @FromMasterComanyID)
 				BEGIN
-					INSERT INTO [PAS_BETA].DBO.GLAccount ([OldAccountCode],[AccountCode],[AccountName],[AccountDescription],[AllowManualJE],[GLAccountTypeId],[GLClassFlowClassificationId],
+					INSERT INTO [PowerAeroSuites_BAG].DBO.GLAccount ([OldAccountCode],[AccountCode],[AccountName],[AccountDescription],[AllowManualJE],[GLAccountTypeId],[GLClassFlowClassificationId],
 					[MasterCompanyId],[CreatedBy],[UpdatedBy],[CreatedDate],[UpdatedDate],[IsActive],[IsDeleted],[POROCategoryId],[GLAccountNodeId],[LedgerId],[LedgerName],[InterCompany],
 					[Category1099Id],[Threshold],[IsManualJEReference],[ReferenceTypeId])
-					VALUES (NULL, '10000', 'Cash', '', 1, (SELECT GLC.GLAccountClassId FROM [PAS_BETA].DBO.GLAccountClass GLC WITH (NOLOCK) WHERE GLC.GLAccountClassName = 'Asset' AND GLC.MasterCompanyId = @FromMasterComanyID), 
-					(SELECT GLCF.GLClassFlowClassificationId FROM [PAS_BETA].DBO.GLCashFlowClassification GLCF WITH (NOLOCK) WHERE GLCF.GLClassFlowClassificationName = 'OPERATING ACTIVITY' AND GLCF.MasterCompanyId = @FromMasterComanyID),
+					VALUES (NULL, '10000', 'Cash', '', 1, (SELECT GLC.GLAccountClassId FROM [PowerAeroSuites_BAG].DBO.GLAccountClass GLC WITH (NOLOCK) WHERE GLC.GLAccountClassName = 'Asset' AND GLC.MasterCompanyId = @FromMasterComanyID), 
+					(SELECT GLCF.GLClassFlowClassificationId FROM [PowerAeroSuites_BAG].DBO.GLCashFlowClassification GLCF WITH (NOLOCK) WHERE GLCF.GLClassFlowClassificationName = 'OPERATING ACTIVITY' AND GLCF.MasterCompanyId = @FromMasterComanyID),
 					@FromMasterComanyID, @UserName, @UserName, GETDATE(), GETDATE(), 1, 0, NULL, NULL, 0, '', 0, NULL, NULL, NULL, NULL)
 				END
-				SELECT @GLAccountId = GLAccountId FROM [PAS_BETA].DBO.GLAccount GL WITH (NOLOCK) WHERE AccountCode = '10000' AND MasterCompanyId = @FromMasterComanyID;
-				SELECT @UOMId = UnitOfMeasureId FROM [PAS_BETA].DBO.UnitOfMeasure MF WHERE UPPER(MF.ShortName) IN (SELECT UPPER(UOM_CODE) FROM [Quantum].QCTL_NEW_3.UOM_CODES Where UOM_AUTO_KEY = @UOM_AUTO_KEY) AND MasterCompanyId = @FromMasterComanyID;
-				SELECT @ManufacturerId = ManufacturerId FROM [PAS_BETA].DBO.Manufacturer MF WHERE UPPER(MF.[Name]) IN (SELECT UPPER(DESCRIPTION) FROM [Quantum].QCTL_NEW_3.MANUFACTURER Where MFG_AUTO_KEY = @ManufacturerId) AND MasterCompanyId = @FromMasterComanyID;
-				SELECT @PriorityId = PriorityId FROM [PAS_BETA].DBO.[Priority] P WHERE UPPER(Description) = 'ROUTINE' AND MasterCompanyId = @FromMasterComanyID;
-				SELECT @CurrencyId = CurrencyId FROM [PAS_BETA].DBO.[Currency] C WHERE UPPER(Code) = 'USD' AND MasterCompanyId = @FromMasterComanyID;
-				SELECT @AssetAcquisitionTypeId_BUY = AssetAcquisitionTypeId FROM [PAS_BETA].DBO.[AssetAcquisitionType] C WHERE UPPER(Name) = 'BUY' AND MasterCompanyId = @FromMasterComanyID;
-				SELECT @AssetAcquisitionTypeId_MAKE = AssetAcquisitionTypeId FROM [PAS_BETA].DBO.[AssetAcquisitionType] C WHERE UPPER(Name) = 'MAKE' AND MasterCompanyId = @FromMasterComanyID;
+				SELECT @GLAccountId = GLAccountId FROM [PowerAeroSuites_BAG].DBO.GLAccount GL WITH (NOLOCK) WHERE AccountCode = '10000' AND MasterCompanyId = @FromMasterComanyID;
+				--SELECT @UOMId = UnitOfMeasureId FROM [PowerAeroSuites_BAG].DBO.UnitOfMeasure MF WHERE UPPER(MF.ShortName) IN (SELECT UPPER(UOM_CODE) FROM [BEACH].QCTL1.UOM_CODES Where UOM_AUTO_KEY = @UOM_AUTO_KEY) AND MasterCompanyId = @FromMasterComanyID;
+
+				DECLARE @UOMCode VARCHAR(50);
+				
+				SELECT @UOMCode = UOM_CODE FROM [BEACH].QCTL1.UOM_CODES WHERE UOM_AUTO_KEY = @UOM_AUTO_KEY;
+
+				SET @UOMCode = LTRIM(RTRIM(@UOMCode));
+
+				SELECT @UOMId = UnitOfMeasureId FROM [PowerAeroSuites_BAG].DBO.UnitOfMeasure WHERE UPPER(LTRIM(RTRIM(ShortName))) = UPPER(@UOMCode) AND MasterCompanyId = @FromMasterComanyID;
+
+				IF (@UOMId IS NULL)
+				BEGIN
+					DECLARE @StandardId BIGINT = NULL;
+					SELECT TOP 1 @StandardId = StandardId FROM [PowerAeroSuites_BAG].DBO.[Standard] WHERE MasterCompanyId = @FromMasterComanyID;
+
+					INSERT INTO [PowerAeroSuites_BAG].DBO.UnitOfMeasure
+					(ShortName, Description, MasterCompanyId, CreatedBy, UpdatedBy, CreatedDate, UpdatedDate, IsActive, IsDeleted, StandardId)
+					VALUES
+					(@UOMCode, @UOMCode, @FromMasterComanyID, @UserName, @UserName, GETDATE(), GETDATE(), 1, 0, @StandardId);
+
+					SET @UOMId = SCOPE_IDENTITY();
+				END
+
+				SELECT @PASItemGroupdId = ItemGroupId FROM [PowerAeroSuites_BAG].DBO.ItemGroup MF WHERE UPPER(MF.ItemGroupCode) IN (SELECT UPPER(GROUP_CODE) FROM [BEACH].QCTL1.PN_GROUPS Where PNG_AUTO_KEY = @ItemGroupdId) AND MasterCompanyId = @FromMasterComanyID;
+
+				DECLARE @ManufacturerName VARCHAR(500);
+				SELECT @ManufacturerName = DESCRIPTION FROM [BEACH].QCTL1.MANUFACTURER WHERE MFG_AUTO_KEY = @ManufacturerId;
+
+				SET @ManufacturerName = LTRIM(RTRIM(@ManufacturerName));
+
+				SELECT @PASManufacturerId = ManufacturerId FROM [PowerAeroSuites_BAG].DBO.Manufacturer MF WHERE UPPER(LTRIM(RTRIM([Name]))) = UPPER(@ManufacturerName) AND MasterCompanyId = @FromMasterComanyID;
+
+				IF NOT EXISTS (SELECT 1 FROM [PowerAeroSuites_BAG].DBO.Manufacturer WHERE UPPER(LTRIM(RTRIM([Name]))) = UPPER(@ManufacturerName) AND MasterCompanyId = @FromMasterComanyID)
+				BEGIN
+					INSERT INTO [PowerAeroSuites_BAG].DBO.Manufacturer
+					([Name],[Comments],MasterCompanyId,CreatedBy,UpdatedBy,CreatedDate,UpdatedDate,IsActive,IsDeleted)
+					VALUES
+					(@ManufacturerName,NULL,@FromMasterComanyID,@UserName,@UserName,GETDATE(),GETDATE(),1,0);
+				END
+
+				SELECT @PASManufacturerId = ManufacturerId FROM [PowerAeroSuites_BAG].DBO.Manufacturer WHERE UPPER(LTRIM(RTRIM([Name]))) = UPPER(@ManufacturerName) AND MasterCompanyId = @FromMasterComanyID;
+
+				SELECT @PriorityId = PriorityId FROM [PowerAeroSuites_BAG].DBO.[Priority] P WHERE UPPER(Description) = 'ROUTINE' AND MasterCompanyId = @FromMasterComanyID;
+				SELECT @CurrencyId = CurrencyId FROM [PowerAeroSuites_BAG].DBO.[Currency] C WHERE UPPER(Code) = 'USD' AND MasterCompanyId = @FromMasterComanyID;
+				SELECT @AssetAcquisitionTypeId_BUY = AssetAcquisitionTypeId FROM [PowerAeroSuites_BAG].DBO.[AssetAcquisitionType] C WHERE UPPER(Name) = 'BUY' AND MasterCompanyId = @FromMasterComanyID;
+				SELECT @AssetAcquisitionTypeId_MAKE = AssetAcquisitionTypeId FROM [PowerAeroSuites_BAG].DBO.[AssetAcquisitionType] C WHERE UPPER(Name) = 'MAKE' AND MasterCompanyId = @FromMasterComanyID;
 
 				DECLARE @DefaultSiteId BIGINT;
-				SELECT @DefaultSiteId = SiteId FROM [PAS_BETA].dbo.[Site] WHERE UPPER([Name]) = UPPER('MIG') AND MasterCompanyId = @FromMasterComanyID;
+				SELECT @DefaultSiteId = SiteId FROM [PowerAeroSuites_BAG].dbo.[Site] WHERE UPPER([Name]) = UPPER('Beach Aviation Group') AND MasterCompanyId = @FromMasterComanyID;
 
-				IF NOT EXISTS (SELECT 1 FROM [PAS_BETA].dbo.[ItemMaster] WITH (NOLOCK) WHERE UPPER([partnumber]) = UPPER(@PN) AND MasterCompanyId = @FromMasterComanyID)
+				IF NOT EXISTS (SELECT 1 FROM [PowerAeroSuites_BAG].dbo.[ItemMaster] WITH (NOLOCK) WHERE UPPER([partnumber]) = UPPER(@PN) AND MasterCompanyId = @FromMasterComanyID)
 				BEGIN
-					INSERT INTO [PAS_BETA].[dbo].[MasterParts]
+					INSERT INTO [PowerAeroSuites_BAG].[dbo].[MasterParts]
 					([PartNumber], [Description], [MasterCompanyId], [CreatedDate], [CreatedBy], [UpdatedDate], [UpdatedBy], [IsActive], [IsDeleted], [ManufacturerId], [PartType])
-					SELECT T.PartNumber, T.PartDescription, @FromMasterComanyID, GETDATE(), @UserName, GETDATE(), @UserName, 1, 0, @ManufacturerId, NULL
+					SELECT T.PartNumber, T.PartDescription, @FromMasterComanyID, GETDATE(), @UserName, GETDATE(), @UserName, 1, 0, @PASManufacturerId, NULL
 					FROM #TempItemMaster AS T WHERE ID = @LoopID;
 
 					SET @InsertedPartId = SCOPE_IDENTITY();
 
-					INSERT INTO [PAS_BETA].[dbo].[ItemMaster]
+					INSERT INTO [PowerAeroSuites_BAG].[dbo].[ItemMaster]
 					 ([ItemTypeId],[PartAlternatePartId],[ItemGroupId],[ItemClassificationId],[IsHazardousMaterial],[IsExpirationDateAvailable],[ExpirationDate]
 					,[IsReceivedDateAvailable],[DaysReceived],[IsManufacturingDateAvailable],[ManufacturingDays],[IsTagDateAvailable],[TagDays],[IsOpenDateAvailable]
 					,[OpenDays],[IsShippedDateAvailable],[ShippedDays],[IsOtherDateAvailable],[OtherDays],[ProvisionId],[ManufacturerId],[IsDER],[NationalStockNumber],[IsSchematic]
@@ -209,16 +251,16 @@ BEGIN
 					,[ItemGroup],[AssetAcquistionType],[ManufacturerName],[PurchaseUnitOfMeasure],[StockUnitOfMeasure],[ConsumeUnitOfMeasure],[PurchaseCurrency],[SalesCurrency]
 					,[GLAccount],[Priority],[SiteName],[WarehouseName],[LocationName],[ShelfName],[BinName],[CurrentStlNo],[MTBUR],[NE],[NS],[OH],[REP],[SVC],[Figure],[Item])
 
-					SELECT 1, NULL, @ItemGroupdId, @ItemClassificationId, (CASE WHEN HAZARD_MATERIAL = 'T' THEN 1 ELSE 0 END), 0, NULL
+					SELECT 1, NULL, @PASItemGroupdId, @ItemClassificationId, (CASE WHEN HAZARD_MATERIAL = 'T' THEN 1 ELSE 0 END), 0, NULL
 					,0, 0, 0, 0, 0, 0, 0
-					,0, 0, 0, 0, 0, NULL, @ManufacturerId, (CASE WHEN DER_FLAG = 'T' THEN 1 ELSE 0 END), NULL, 0
+					,0, 0, 0, 0, 0, NULL, @PASManufacturerId, (CASE WHEN DER_FLAG = 'T' THEN 1 ELSE 0 END), NULL, 0
 					,0, 0, 0, 0, @GLAccountId, @UOMId, NULL, NULL, CAST(ISNULL(LeadDays, 0) AS INT)
-					,CAST(ISNULL(REORDER_COND_LEVEL, 0) AS INT), 0, CAST(MinimumOrderQuantity AS INT), CAST(PartListPrice AS DECIMAL), @PriorityId, NULL, NotesAdded, NULL, NULL, NULL
+					,CAST(ISNULL(REORDER_COND_LEVEL, 0) AS INT), 0, CAST(ISNULL(MinimumOrderQuantity, 0) AS INT), CAST(PartListPrice AS DECIMAL), @PriorityId, NULL, NotesAdded, NULL, NULL, NULL
 					,NULL, NULL, NULL, NULL, NULL, NULL, NULL, @CurrencyId
 					,NULL, @CurrencyId, GETDATE(), GETDATE(), CASE WHEN T.IsActive = 'T' THEN 1 ELSE 0 END, @CurrencyId, @FromMasterComanyID, @UserName
 					,@UserName, CASE WHEN T.DATE_CREATED IS NOT NULL THEN CAST(T.DATE_CREATED AS Datetime2) ELSE GETDATE() END, CASE WHEN T.DATE_CREATED IS NOT NULL THEN CAST(T.DATE_CREATED AS Datetime2) ELSE GETDATE() END, 0, 0, NULL, 0, NULL, T.PartNumber, T.PartDescription
 					,(CASE WHEN ISNULL(T.IsTimeLife, 'F') = 'T' THEN 1 ELSE 0 END), (CASE WHEN ISNULL(T.IsSerialized, 'F') = 'T' THEN 1 ELSE 0 END), NULL, (CASE WHEN ISNULL(T.SHELF_LIFE, 'F') = 'T' THEN 1 ELSE 0 END), NULL, NULL, CAST(ISNULL(PartListPrice, 0) AS decimal), LIST_PRICE_DATE, NULL
-					,0, ECC_NUMBER, ITAR_NUMBER, CAST(SHELF_LIFE_DAYS AS NUMERIC), 0, (CASE WHEN ISNULL(T.PMA_FLAG, 'F') = 'T' THEN 1 ELSE 0 END), 0, 0, NULL, NULL
+					,0, ECC_NUMBER, ITAR_NUMBER, CAST(ISNULL(SHELF_LIFE_DAYS, 0) AS NUMERIC), 0, (CASE WHEN ISNULL(T.PMA_FLAG, 'F') = 'T' THEN 1 ELSE 0 END), 0, 0, NULL, NULL
 					,NULL, NULL, NULL, @InsertedPartId, NULL, NULL, @DefaultSiteId, NULL, NULL, NULL
 					,NULL, (CASE WHEN T.PROCUREMENT = 'BUY' THEN @AssetAcquisitionTypeId_BUY WHEN T.PROCUREMENT = 'MAKE' THEN @AssetAcquisitionTypeId_MAKE ELSE @AssetAcquisitionTypeId_BUY END), (CASE WHEN ISNULL(T.IsHOTPart, 'F') = 'T' THEN 1 ELSE 0 END), NULL, 0, (CASE WHEN ISNULL(T.PMA_FLAG, 'F') = 'F' THEN 1 ELSE 0 END), NULL, NULL, NULL
 					,NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
@@ -227,7 +269,7 @@ BEGIN
 
 					SET @InsertedItemMasterId = SCOPE_IDENTITY();
 
-					EXEC [PAS_BETA].dbo.UpdateItemMasterDetail @InsertedItemMasterId;
+					--EXEC [PowerAeroSuites_BAG].dbo.UpdateItemMasterDetail @InsertedItemMasterId;
 
 					UPDATE IMs
 					SET IMs.Migrated_Id = @InsertedPartId,
@@ -269,14 +311,14 @@ BEGIN
     ERROR_PROCEDURE() AS ErrorProcedure,
     ERROR_LINE() AS ErrorLine,
     ERROR_MESSAGE() AS ErrorMessage;
-	  DECLARE @ErrorLogID int
-	  ,@DatabaseName varchar(100) = DB_NAME()
-		-----------------------------------PLEASE CHANGE THE VALUES FROM HERE TILL THE NEXT LINE---------------------------------------
-	  ,@AdhocComments varchar(150) = 'MigrateItemMasterRecords'
-	  ,@ProcedureParameters varchar(3000) = '@Parameter1 = ' + ISNULL(CAST(@FromMasterComanyID AS VARCHAR(10)), '') + ''
-	  ,@ApplicationName varchar(100) = 'PAS'
-	  -----------------------------------PLEASE DO NOT EDIT BELOW----------------------------------------
-	  RAISERROR ('Unexpected Error Occured in the database. Please let the support team know of the error number : %d', 16, 1, @ErrorLogID)  
-	  RETURN (1);  
+	 -- DECLARE @ErrorLogID int
+	 -- ,@DatabaseName varchar(100) = DB_NAME()
+		-------------------------------------PLEASE CHANGE THE VALUES FROM HERE TILL THE NEXT LINE---------------------------------------
+	 -- ,@AdhocComments varchar(150) = 'MigrateItemMasterRecords'
+	 -- ,@ProcedureParameters varchar(3000) = '@Parameter1 = ' + ISNULL(CAST(@FromMasterComanyID AS VARCHAR(10)), '') + ''
+	 -- ,@ApplicationName varchar(100) = 'PAS'
+	 -- -----------------------------------PLEASE DO NOT EDIT BELOW----------------------------------------
+	 -- RAISERROR ('Unexpected Error Occured in the database. Please let the support team know of the error number : %d', 16, 1, @ErrorLogID)  
+	 -- RETURN (1);  
 	 END CATCH  
 END
