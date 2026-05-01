@@ -1,12 +1,13 @@
 ﻿CREATE TABLE [dbo].[Stocklines] (
-    [StocklineId]         BIGINT          NOT NULL,
+    [Id]                  BIGINT          IDENTITY (1, 1) NOT NULL,
+    [StocklineId]         BIGINT          NULL,
     [CustomerId]          BIGINT          NULL,
     [ManufacturerId]      BIGINT          NULL,
     [ConditionId]         BIGINT          NULL,
     [WarehouseId]         BIGINT          NULL,
     [LocationId]          BIGINT          NULL,
     [ItemMasterId]        BIGINT          NULL,
-    [PartNumber]          VARCHAR (100)   NULL,
+    [PartNumber]          VARCHAR (8000)  NULL,
     [StocklineNumber]     VARCHAR (100)   NULL,
     [Ctrl_Number]         VARCHAR (100)   NULL,
     [Ctrl_ID]             VARCHAR (100)   NULL,
@@ -15,7 +16,7 @@
     [Qty_Available]       INT             NULL,
     [Qty_Reserved]        INT             NULL,
     [Qty_Adjusted]        INT             NULL,
-    [SerialNumber]        VARCHAR (100)   NULL,
+    [SerialNumber]        VARCHAR (8000)  NULL,
     [ShelfLife]           VARCHAR (10)    NULL,
     [ExpirationDate]      DATETIME2 (7)   NULL,
     [MfgLotNum]           VARCHAR (100)   NULL,
@@ -46,6 +47,6 @@
     [SuccessMsg]          VARCHAR (500)   NULL,
     [ErrorMsg]            VARCHAR (500)   NULL,
     [Date_Created]        DATETIME2 (7)   NULL,
-    CONSTRAINT [PK_Stocklines] PRIMARY KEY CLUSTERED ([StocklineId] ASC)
+    CONSTRAINT [PK_Stocklines_1] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 

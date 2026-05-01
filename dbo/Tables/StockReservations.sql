@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[StockReservations] (
-    [StockReservationId]  BIGINT          NOT NULL,
+    [Id]                  BIGINT          IDENTITY (1, 1) NOT NULL,
+    [StockReservationId]  BIGINT          NULL,
     [SOPartId]            BIGINT          NULL,
     [StocklineId]         BIGINT          NULL,
     [ROPartId]            BIGINT          NULL,
@@ -22,6 +23,6 @@
     [Migrated_Id]         BIGINT          NULL,
     [SuccessMsg]          VARCHAR (500)   NULL,
     [ErrorMsg]            VARCHAR (500)   NULL,
-    CONSTRAINT [PK_StockReservations] PRIMARY KEY CLUSTERED ([StockReservationId] ASC)
+    CONSTRAINT [PK_StockReservations_1] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 
