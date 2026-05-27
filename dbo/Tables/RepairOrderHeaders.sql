@@ -11,7 +11,7 @@
     [FaxNumber]        VARCHAR (100)   NULL,
     [HistoricalFlag]   VARCHAR (10)    NULL,
     [InOutFlag]        VARCHAR (10)    NULL,
-    [Notes]            VARCHAR (500)   NULL,
+    [Notes]            VARCHAR (MAX)   NULL,
     [TotalCost]        DECIMAL (18, 2) NULL,
     [OpenFlag]         VARCHAR (100)   NULL,
     [PhoneNumber]      VARCHAR (100)   NULL,
@@ -23,7 +23,7 @@
     [ShipAddress5]     VARCHAR (250)   NULL,
     [ShipName]         VARCHAR (250)   NULL,
     [Attention]        VARCHAR (250)   NULL,
-    [Remarks]          VARCHAR (250)   NULL,
+    [Remarks]          VARCHAR (MAX)   NULL,
     [FOB]              VARCHAR (100)   NULL,
     [EmailAddress]     VARCHAR (100)   NULL,
     [WarrantyFlag]     VARCHAR (100)   NULL,
@@ -53,8 +53,9 @@
     [IntegrationType]  VARCHAR (100)   NULL,
     [MasterCompanyId]  BIGINT          NULL,
     [Migrated_Id]      BIGINT          NULL,
-    [SuccessMsg]       VARCHAR (500)   NULL,
-    [ErrorMsg]         VARCHAR (500)   NULL,
-    CONSTRAINT [PK_RepairOrderHeaders] PRIMARY KEY CLUSTERED ([ROHeaderId] ASC)
+    [SuccessMsg]       VARCHAR (MAX)   NULL,
+    [ErrorMsg]         VARCHAR (MAX)   NULL,
+    [Id]               BIGINT          IDENTITY (1, 1) NOT NULL,
+    CONSTRAINT [PK_RepairOrderHeaders] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 

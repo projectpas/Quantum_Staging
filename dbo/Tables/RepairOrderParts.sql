@@ -55,6 +55,7 @@
     [Migrated_Id]         BIGINT          NULL,
     [SuccessMsg]          VARCHAR (500)   NULL,
     [ErrorMsg]            VARCHAR (500)   NULL,
-    CONSTRAINT [PK_RepairOrderParts] PRIMARY KEY CLUSTERED ([ROPartId] ASC)
+    [Id]                  BIGINT          IDENTITY (1, 1) NOT NULL,
+    CONSTRAINT [PK_RepairOrderParts] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 

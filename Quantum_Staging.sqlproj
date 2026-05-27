@@ -91,5 +91,8 @@
     <Build Include="dbo\Stored Procedures\MigrateItemMasterRecords.sql" />
     <Build Include="dbo\Stored Procedures\MigrateWorkOrderLaborRecords.sql" />
     <Build Include="dbo\Stored Procedures\ItemMasterStockList.sql" />
+    <Build Include="dbo\Tables\SalesOrderQuoteParts.sql" />
+    <Build Include="dbo\Tables\SalesOrderQuoteHeaders.sql" />
+    <Build Include="dbo\Tables\SalesOrderParts.sql" />
   </ItemGroup>
 </Project>

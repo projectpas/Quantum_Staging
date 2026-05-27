@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[SalesOrderParts] (
+    [Id]                 BIGINT          IDENTITY (1, 1) NOT NULL,
+    [SalesOrderPartId]   BIGINT          NOT NULL,
+    [SalesOrderHeaderId] BIGINT          NULL,
+    [ItemMasterId]       BIGINT          NULL,
+    [ConditionId]        BIGINT          NULL,
+    [SodNotes]           NVARCHAR (MAX)  NULL,
+    [OutrightPrice]      DECIMAL (18, 4) NULL,
+    [UnitPrice]          DECIMAL (18, 4) NULL,
+    [QtyOrdered]         DECIMAL (18, 4) NULL,
+    [OpenFlag]           NVARCHAR (10)   NULL,
+    [QtyInvoiced]        DECIMAL (18, 4) NULL,
+    [QtyPendingInvoice]  DECIMAL (18, 4) NULL,
+    [QtyShip]            DECIMAL (18, 4) NULL,
+    [QtyReserved]        DECIMAL (18, 4) NULL,
+    [QtyPurch]           DECIMAL (18, 4) NULL,
+    [RouteDesc]          NVARCHAR (500)  NULL,
+    [CustRef]            NVARCHAR (500)  NULL,
+    [MasterCompanyId]    BIGINT          NULL,
+    [Migrated_Id]        BIGINT          NULL,
+    [SuccessMsg]         NVARCHAR (MAX)  NULL,
+    [ErrorMsg]           NVARCHAR (MAX)  NULL,
+    CONSTRAINT [PK_SalesOrderParts] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
