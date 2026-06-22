@@ -12,7 +12,7 @@
     [EntryDate]        DATETIME2 (7)   NULL,
     [FaxNumber]        VARCHAR (100)   NULL,
     [HistoricalFlag]   VARCHAR (10)    NULL,
-    [Notes]            VARCHAR (500)   NULL,
+    [Notes]            VARCHAR (MAX)   NULL,
     [TotalCost]        DECIMAL (18, 2) NULL,
     [OpenFlag]         VARCHAR (100)   NULL,
     [PhoneNumber]      VARCHAR (100)   NULL,
