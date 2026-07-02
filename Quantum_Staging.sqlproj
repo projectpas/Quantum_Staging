@@ -98,5 +98,9 @@
     <Build Include="dbo\Tables\RepairOrderQuoteHeaders.sql" />
     <Build Include="dbo\Tables\PurchaseOrderQuoteParts.sql" />
     <Build Include="dbo\Tables\PurchaseOrderQuoteHeaders.sql" />
+    <Build Include="dbo\Tables\ShippingHeaders.sql" />
+    <Build Include="dbo\Tables\ShippingDetails.sql" />
+    <Build Include="dbo\Tables\InvoiceHeaders.sql" />
+    <Build Include="dbo\Tables\InvoiceDetails.sql" />
   </ItemGroup>
 </Project>
